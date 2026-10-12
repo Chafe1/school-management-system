@@ -81,6 +81,22 @@ npm run dev
 ```
 *The React application will launch on `http://localhost:5173` with proxy configured to the backend API.*
 
+### Deploy to Vercel
+
+The project can be deployed as one Vercel project: Vite serves the frontend and a serverless function handles `/api/*` requests. Production requires MongoDB Atlas; the in-memory database fallback is disabled in production.
+
+1. Create a MongoDB Atlas cluster and database user. Configure Atlas network access for Vercel using your chosen Vercel egress/network setup.
+2. Import `Chafe1/school-management-system` into Vercel with the repository root as the project root. Vercel uses the repository's `vercel.json` build settings.
+3. Add these **Production** environment variables in Vercel Project Settings → Environment Variables:
+   - `MONGO_URI`: the Atlas connection string for this database.
+   - `JWT_SECRET`: a newly generated, high-entropy secret.
+   - `ADMIN_EMAIL`: the initial administrator's email address.
+   - `ADMIN_PASSWORD`: a unique password of at least 8 characters with uppercase, lowercase, number, and special character.
+   - `ADMIN_FIRST_NAME` and `ADMIN_LAST_NAME` (optional; default to School Administrator).
+4. Redeploy. The first API request connects to Atlas and creates the initial administrator if no admin exists. The development demo accounts are not seeded in the Vercel deployment.
+
+Do not commit `.env` files or put production secrets in source control. Students and staff must be created by an administrator; only parent accounts can self-register.
+
 ---
 
 ## 📡 REST API Endpoints Overview
@@ -90,7 +106,7 @@ All endpoints are prefixed with `/api/v1`:
 | Module | Method | Endpoint | Description |
 | :--- | :--- | :--- | :--- |
 | **Auth** | POST | `/auth/login` | Authenticate user & return JWT |
-| | POST | `/auth/register` | Self-register new student/parent |
+| | POST | `/auth/register` | Self-register a parent account |
 | | GET | `/auth/me` | Fetch authenticated user profile |
 | **Users** | GET | `/users` | List users with role filter & search |
 | | POST | `/users` | Admin create new user |

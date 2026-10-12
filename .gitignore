@@ -23,6 +23,7 @@ Thumbs.db
 
 # VS Code
 .vscode/
+.vercel/
 
 # Coverage
 coverage/

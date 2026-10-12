@@ -13,7 +13,12 @@ const connectDB = async () => {
     console.log(`[MongoDB] Connected successfully to: ${conn.connection.host}`);
     return conn;
   } catch (primaryErr) {
-    console.warn(`[MongoDB] Standard connection to ${uri} failed: ${primaryErr.message}`);
+    console.warn('[MongoDB] Standard connection failed.');
+
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('Failed to connect to MongoDB. Verify MONGO_URI and database network access.');
+    }
+
     console.log('[MongoDB] Attempting in-memory MongoDB fallback (mongodb-memory-server)...');
 
     try {

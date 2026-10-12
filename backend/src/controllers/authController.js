@@ -1,6 +1,4 @@
 const User = require('../models/User');
-const Student = require('../models/Student');
-const Teacher = require('../models/Teacher');
 const generateToken = require('../utils/generateToken');
 
 const passwordStrengthRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
@@ -9,7 +7,7 @@ const passwordStrengthRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).
 // @route POST /api/v1/auth/register
 const register = async (req, res) => {
   try {
-    const { email, password, role, firstName, lastName, phone, address, employeeId, qualification } = req.body;
+    const { email, password, role, firstName, lastName, phone, address } = req.body;
 
     if (!password || !passwordStrengthRegex.test(password)) {
       return res.status(400).json({
@@ -18,10 +16,10 @@ const register = async (req, res) => {
       });
     }
 
-    if (role === 'student') {
+    if (role && role !== 'parent') {
       return res.status(403).json({
         success: false,
-        message: 'Students must be registered by the school administration.'
+        message: 'Only parent accounts can self-register. Contact the school administration for other account types.'
       });
     }
 
@@ -33,27 +31,11 @@ const register = async (req, res) => {
     const user = await User.create({
       email,
       password,
-      role: role || 'student',
+      role: 'parent',
       firstName,
       lastName,
       contact: { phone, address }
     });
-
-    let extraProfile = null;
-    if (user.role === 'student') {
-      const enrollmentNo = 'ENR-' + Date.now().toString().slice(-6);
-      extraProfile = await Student.create({
-        userId: user._id,
-        enrollmentNo
-      });
-    } else if (user.role === 'teacher') {
-      const empId = employeeId || 'EMP-' + Date.now().toString().slice(-4);
-      extraProfile = await Teacher.create({
-        userId: user._id,
-        employeeId: empId,
-        qualification: qualification || 'B.Ed'
-      });
-    }
 
     const token = generateToken(user._id, user.role);
 
@@ -68,7 +50,7 @@ const register = async (req, res) => {
         lastName: user.lastName,
         fullName: user.fullName,
         contact: user.contact,
-        profile: extraProfile
+        profile: null
       }
     });
   } catch (err) {
