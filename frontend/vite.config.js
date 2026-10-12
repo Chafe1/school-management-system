@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-const backendTarget = process.env.VITE_API_URL || 'http://localhost:5005';
+const backendTarget = process.env.VITE_API_URL || 'http://localhost:5001';
 
 export default defineConfig({
   plugins: [react()],
